@@ -1,0 +1,9 @@
+# Original personal reference page: kept local, never committed
+charleston-reference.html
+
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env*
+.DS_Store
