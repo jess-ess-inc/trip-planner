@@ -1,6 +1,6 @@
 # Trip Planner: plan
 
-Status: **planning only, nothing built yet.** Round 1 answers are in (section 4). A few follow-up questions are still open.
+Status: **planning only, nothing built yet.** Decisions are in section 4; one small question is left before milestone 1.
 
 This turns `charleston-reference.html` into a general trip planner: anyone enters a destination, dates and travelers, and gets curated Activity, Dining and Shopping guides, a map, and a shared day planner.
 
@@ -33,14 +33,14 @@ Restaurants are well sourced (Michelin, James Beard, Resy, City Paper, Post and 
 
 ### The short version
 
-This is the same stack as your WGI golf app, so the setup steps will feel familiar.
+This is a separate project with its own repo, Vercel project and database. It uses the same kinds of tools as your golf app, so the setup steps will feel familiar, but nothing is shared between them.
 
 | Piece | Choice | Why, in plain terms |
 |---|---|---|
 | Hosting | **Vercel** | You already have it. Every push to a GitHub branch gets its own preview link automatically. The free Hobby plan covers this (it's for non-commercial use, which a free trip planner is). |
-| Framework | **Next.js + React + TypeScript** | Vercel's own framework: pages and server code live in one project, and it's what WGI uses. |
+| Framework | **Next.js + React + TypeScript** | Vercel's own framework: pages and server code live in one project. |
 | Styling | **Your existing CSS, ported almost as-is** | Keeps the look identical. Color tokens get neutral names (`--accent` instead of `--haint`) but keep the same values, light and dark. No Tailwind. |
-| Database | **Neon Postgres + Prisma** | Same as WGI. Added from Vercel's Marketplace in a couple of clicks, with a free tier that's plenty here. (I'm not suggesting Supabase because its free projects pause after a week without visits, which is a bad fit for a site people open now and then.) |
+| Database | **Neon Postgres + Prisma** | Added from Vercel's Marketplace in a couple of clicks, with a free tier that's plenty here. (I'm not suggesting Supabase because its free projects pause after a week without visits, which is a bad fit for a site people open now and then.) |
 | Rate limits and quotas | **Upstash Redis** | Also one click in the Vercel Marketplace, free tier. Counts research requests per visitor and tracks the daily spend cap. |
 | Research jobs | **Next.js background tasks**, one per guide | Each research job has to finish within Vercel's time limit for a single server call (5 minutes on Hobby), so each guide gets its own job. The page shows progress ("Researching dining… 2 of 3"). |
 | Bot protection | **Cloudflare Turnstile** | A free, mostly invisible "are you human" check that works on any host, including Vercel. It only needs a free key. |
@@ -170,20 +170,23 @@ Web searches add $10 per 1,000 searches, about $0.50–1.00 a trip, and that's a
 
 ### Ready for international (from question 6)
 
-v1 targets US destinations, but I'll avoid painting us into a corner:
-- Each trip stores its country, currency and units.
+v1 launches with US destinations, but this groundwork gets built now, since it's cheap now and painful later:
+- Each trip stores its country, currency, time zone and units (miles or kilometers).
 - Dates and money are formatted with the browser's built-in locale tools.
 - The holiday calendar uses a library that covers many countries.
-- The source tiers are stored per region, so adding, say, UK or Italian publications later is a data change, not a rewrite.
-- Michelin and Condé Nast already cover much of the world.
+- The room-tax calculator supports both a percentage tax (US style) and a flat tax per person per night (common in Europe), or both together.
+- The far-away label can say "taxi or transit" instead of "drive" where that's more natural.
+- The source tiers are stored per country, so adding a country means adding its list of trusted publications and running a test trip. That's a data change, not a rewrite.
+- Michelin and Condé Nast already cover much of the world, and Geoapify and the map tiles are worldwide.
+
+The part that takes real work per country is **curation**: deciding which local critics and papers are trustworthy (often in another language), which popular sites are crowd-sourced and must be excluded, and checking that the AI handles local patterns like August closures, Sunday closing and long lunch breaks. That's why countries get added one at a time, each with a test trip.
 
 ### Roadmap after v1
 
 - **Compare stay options**: a neutral version of the hotel upgrade case and Plan A vs Plan B.
 - Live sync between editors.
 - Compare two date options (the reference's Dec 26–29 vs Dec 27–30 toggle).
-- International destinations: per-country publications, currencies and holidays.
-- Live hotel prices. This needs a booking partner such as Expedia or Booking.com, which requires approval and usually affiliate links.
+- International destinations, one country at a time, each with its own trusted-source list and test trip.
 
 ---
 
@@ -191,8 +194,8 @@ v1 targets US destinations, but I'll avoid painting us into a corner:
 
 Each milestone ends with something working that you can open, and a local commit you push with GitHub Desktop.
 
-1. **Port.** Rebuild the reference in Next.js, using the Charleston data as a fixture: one card list, placeholder travelers ("Traveler 1–3"), Marion Square hotels. Strip all personal content, and add an automatic check that fails if any of the family names, or anything shaped like an API key, ever shows up in committed files. Fix the Edmund's Oast bug. Plans are saved in your browser for now. **→ Your sign-off on look and feel.**
-2. **Generalize.** Days come from the date range; traveler chips, initials, colors and "For [name]" tabs come from the traveler list (2–8 people); guides are drawn from the schema; ranking; hotel picker for distances. Unit tests for availability rules, the double-booking warning and walk/drive math.
+1. **Port.** Rebuild the reference in Next.js, using the Charleston data as a fixture: one card list, starting with "Traveler 1" plus an Add traveler button, Marion Square hotels. Strip all personal content, and add an automatic check that fails if any of the family names, or anything shaped like an API key, ever shows up in committed files. Fix the Edmund's Oast bug. Plans are saved in your browser for now. **→ Your sign-off on look and feel.**
+2. **Generalize.** Days come from the date range; traveler chips, initials, colors and "For [name]" tabs come from the traveler list (1–8 people; the "For [name]" tabs only appear once there's more than one person); guides are drawn from the schema; ranking; hotel picker for distances. Unit tests for availability rules, the double-booking warning and walk/drive math.
 3. **Trip setup and your own spots.** Destination, dates, travelers with interest tags and free text, optional hotels, rooms and budget comfort. Hotel comparison and calculator driven by the hotels you enter. The "Add your own spot" form.
 4. **Recommendation engine.** Research jobs, validator, research library, access code, quotas, Turnstile, spend cap. Acceptance: Charleston, Dec 26–30, four travelers, side by side with the reference.
 5. **Real map and geocoding.**
@@ -207,23 +210,25 @@ You'll need to do a few account steps yourself (I can't create accounts or enter
 
 | # | Question | Decision |
 |---|---|---|
-| 1 | Hosting | **Vercel** (same stack as WGI: Next.js, Neon, Prisma) |
-| 2 | Model and budget | Open: cost explained, waiting on your choice (see below) |
-| 3 | Access code | Open: explained, waiting on your choice |
-| 4 | Tours and classes | **Accept respected local papers and tourism-board editorial coverage for experiences.** Plus **"Add your own spot"** for places not listed. |
-| 5 | Hotel rates and table rows | Open: explained, waiting on your OK |
-| 6 | Where | **US first**, built so international can be added soon |
+| 1 | Hosting | **Vercel** with Next.js, Neon and Prisma. (WGI uses the same tools, but this is a separate project and nothing is shared with it.) |
+| 2 | Model | **Claude Opus 5.5.** Daily cap defaults to **$20**, changeable. |
+| 3 | Research access | **Access code required** for new research. Everything researched goes into the shared library, which anyone can use without a code. |
+| 4 | Tours and classes | **Accept respected local papers and tourism-board editorial coverage for experiences** (tours, classes, events). Plus **"Add your own spot"** for places not listed. |
+| 5 | Hotel rates | **You type in rates** from each hotel's booking page; the calculator does the math. **No live prices or booking partners**, now or planned. The room tax is looked up with a source and editable. Generic table rows plus interest-driven extras. |
+| 6 | Where | **US at launch, with the international groundwork built in now** (see "Ready for international"). Countries are added one at a time after that. |
 | 7 | Old trips | **Auto-delete 90 days after check-out**, plus a **Download PDF summary** |
-| 8 | Git | **Families' personal content stays out of the repo.** The repo is designed to be safe as public. |
+| 8 | Git and travelers | **Families' personal content stays out of the repo. Public repo.** Published under your **personal** GitHub account, not WGI's. Trips start with **"Traveler 1"** and an **Add traveler** button, 1–8 travelers. |
+
+### How the access code works
+
+- The code lives in a Vercel environment variable (`RESEARCH_ACCESS_CODES`). It's never in the repo, so a public repo doesn't reveal it.
+- The variable can hold several codes separated by commas, so you can give different groups their own code and turn one off without affecting the others.
+- Changing a code means editing that variable in Vercel and redeploying. Old codes stop working right away.
+- The code is checked on the server. Five wrong tries locks that visitor out of trying again for an hour.
+- After a correct code, that browser remembers it, so people don't have to retype it.
+- Nothing is recorded about who used a code.
 
 ### Still open
 
-- **2. Which model, and on-demand research or a pre-researched library to start?**
-  - (a) On-demand from day one, about $5–9 (Opus) or $2.50–4.50 (Sonnet) per new destination, billed to an Anthropic API account.
-  - (b) Start with a library of destinations that I research ahead of time from Claude Code (covered by your Claude subscription, $0 in API charges), and add on-demand research later.
-  - (c) Both: the library for everyone, and on-demand research behind the access code.
-  - What daily cap feels right? I suggest $20.
-- **3. Access code for new research at launch: yes or no?**
-- **5. OK that you type in hotel rates, while the app looks up the room tax with a cited source? And OK with the generic table rows plus interest-driven extras?**
 - **4, my reading:** the tourism-board exception applies to experiences only (tours, classes, events). Restaurants and shops keep the stricter list. Say so if you meant everything.
-- **8, which GitHub account:** golf-outing lives under the WGI account. Should this one go there too, or under a personal account?
+- **First international country**, whenever you're ready (no rush).
