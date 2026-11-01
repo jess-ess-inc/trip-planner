@@ -1,6 +1,6 @@
 # Trip Planner: plan
 
-Status: **planning only, nothing built yet.** Decisions are in section 4; one small question is left before milestone 1.
+Status: **milestone 1 (port) built, waiting for your sign-off on look and feel.** Decisions are in section 4.
 
 This turns `charleston-reference.html` into a general trip planner: anyone enters a destination, dates and travelers, and gets curated Activity, Dining and Shopping guides, a map, and a shared day planner.
 
@@ -112,7 +112,7 @@ Anyone with the edit link can add a place the guides don't list: name, type (do,
    - **Tier 1:** Michelin stars, James Beard awards, National Historic Landmarks, national park sites.
    - **Tier 2:** major national publications (Condé Nast Traveler, TIME, NYT, Bon Appétit, Food & Wine, Garden & Gun, Fodor's Choice, Afar), plus James Beard finalists, semifinalists and America's Classics, and Michelin Bib Gourmand and Recommended.
    - **Tier 3:** Resy Hit List, Eater, The Infatuation, and respected local critics and papers.
-   - **Tier 4, experiences only** (tours, classes, events): an editorial feature from the official tourism board. A paid member directory listing doesn't count, since many tourism boards list every business that pays dues.
+   - **Tier 4:** an editorial feature from the official tourism board, for any kind of place (activities, restaurants, shops). It ranks below the other tiers. A paid member directory listing doesn't count, since many tourism boards list every business that pays dues.
    - **Never accepted:** Yelp, Tripadvisor, TikTok, Instagram, and Viator or GetYourGuide ratings. A place's own website can supply hours and booking details, but never counts as the credibility source.
 3. **"Did it actually read this?" check.** The source URL must be one the AI actually retrieved during that research run. This catches invented links.
 4. **Link check.** Our server requests each URL. Some big publishers (Michelin, Resy) block automated checks, so a "403 Forbidden" from an accepted publisher the AI successfully read counts as OK. A 404 or a dead domain gets the card dropped.
@@ -213,7 +213,7 @@ You'll need to do a few account steps yourself (I can't create accounts or enter
 | 1 | Hosting | **Vercel** with Next.js, Neon and Prisma. (WGI uses the same tools, but this is a separate project and nothing is shared with it.) |
 | 2 | Model | **Claude Opus 5.5.** Daily cap defaults to **$20**, changeable. |
 | 3 | Research access | **Access code required** for new research. Everything researched goes into the shared library, which anyone can use without a code. |
-| 4 | Tours and classes | **Accept respected local papers and tourism-board editorial coverage for experiences** (tours, classes, events). Plus **"Add your own spot"** for places not listed. |
+| 4 | Tours and classes | **Accept respected local papers and tourism-board editorial coverage for every kind of place** (activities, restaurants, shops), ranked below the national sources. Plus **"Add your own spot"** for places not listed. |
 | 5 | Hotel rates | **You type in rates** from each hotel's booking page; the calculator does the math. **No live prices or booking partners**, now or planned. The room tax is looked up with a source and editable. Generic table rows plus interest-driven extras. |
 | 6 | Where | **US at launch, with the international groundwork built in now** (see "Ready for international"). Countries are added one at a time after that. |
 | 7 | Old trips | **Auto-delete 90 days after check-out**, plus a **Download PDF summary** |
@@ -230,5 +230,4 @@ You'll need to do a few account steps yourself (I can't create accounts or enter
 
 ### Still open
 
-- **4, my reading:** the tourism-board exception applies to experiences only (tours, classes, events). Restaurants and shops keep the stricter list. Say so if you meant everything.
 - **First international country**, whenever you're ready (no rush).
